@@ -1,0 +1,1681 @@
+{
+  "name": "baby podcasts",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "97338a43-5f09-4f17-8450-7077349ca14c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I",
+          "mode": "list",
+          "cachedResultName": "Baby Podcasts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "id": "8855bb96-f3d0-448f-b15c-6434fce77c3e",
+      "name": "Get URL",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XsodyqhrV9HPNRtk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=yt-dlp -o \"./input/Video/{{ $json['Video URL'].split(\"/\")[4].split(\"?\")[0]  }}.mp4\" \"{{ $json['Video URL'] }}\" -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "cc6e13d7-1c40-4789-906a-67636b06f927",
+      "name": "Download Shorts"
+    },
+    {
+      "parameters": {
+        "command": "=ffmpeg -y -i ./input/Video/{{ $('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}.mp4 -vn -acodec libmp3lame -ab 192k ./input/Audio/{{$('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0]}}.mp3"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ],
+      "id": "509ab09b-9c9a-479c-bc62-690d1745adc7",
+      "name": "Extract Audio"
+    },
+    {
+      "parameters": {
+        "command": "=ffmpeg -ss 00:00:05 -i \"./input/Video/{{ $('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}.mp4\" -frames:v 1 \"./input/Image/{{ $('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}.jpg\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "0693b738-471c-46eb-b270-121e027d6873",
+      "name": "Extract Image"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I",
+          "mode": "list",
+          "cachedResultName": "Baby Podcasts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Downloaded",
+            "Video URL": "={{ $('Get URL').item.json['Video URL'] }}",
+            "Video Path": "=./input/Video/{{ $('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}.mp4",
+            "Audio Path": "=./input/Audio/{{ $('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}.mp3",
+            "Image Path": "=./input/Image/{{ $('Get URL').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}.jpg"
+          },
+          "matchingColumns": [
+            "Video URL"
+          ],
+          "schema": [
+            {
+              "id": "Index",
+              "displayName": "Index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Path",
+              "displayName": "Video Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Audio Path",
+              "displayName": "Audio Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image Path",
+              "displayName": "Image Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Production",
+              "displayName": "Production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1100,
+        0
+      ],
+      "id": "07574416-0af3-4a34-9b83-4ead1fd3f2fc",
+      "name": "Update Status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XsodyqhrV9HPNRtk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "##下載Video 並提取 Audio 和 圖片",
+        "height": 340,
+        "width": 1540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        -140
+      ],
+      "id": "73f64fbd-de11-4e04-9d6c-25efdb734c4c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "##生成寶寶圖片",
+        "height": 340,
+        "width": 1540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        260
+      ],
+      "id": "27c669cf-83e9-4f96-b007-6d8a201f94ed",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -40,
+        340
+      ],
+      "id": "5f4e6ae4-c161-49de-aece-0d56d7dbdef7",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hedra.com/web-app/public/assets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "image-fle"
+            },
+            {
+              "name": "type",
+              "value": "image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        180,
+        340
+      ],
+      "id": "99365403-cba9-43b2-8103-0f6237760c2e",
+      "name": "Image Container",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I",
+          "mode": "list",
+          "cachedResultName": "Baby Podcasts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Production"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        400,
+        340
+      ],
+      "id": "8a6c7efb-5d06-43f3-8517-81aa79dbb1b5",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XsodyqhrV9HPNRtk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json['Image Path'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        600,
+        340
+      ],
+      "id": "7b103ef5-0613-4056-82b8-bdb62dcb2d3b",
+      "name": "Read Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "n",
+              "value": "1"
+            },
+            {
+              "name": "size",
+              "value": "1024x1536"
+            },
+            {
+              "name": "prompt",
+              "value": "Create a photo-realistic, vertical 9:16 portrait of a baby version of this person. Keep their facial structure and profile recognizable. Make it cute and stylized like a toddler. Show them seated at a podcast studio desk with a professional microphone in front of them, with studio lighting, to clearly emphasize the podcast setting."
+            },
+            {
+              "name": "model",
+              "value": "gpt-image-1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        340
+      ],
+      "id": "612c37f6-564c-41dd-8d11-80ae882c8dbf",
+      "name": "Baby Image"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1060,
+        340
+      ],
+      "id": "020d8543-1b62-4a9d-9305-4cb643b86cee",
+      "name": "Get Image"
+    },
+    {
+      "parameters": {
+        "content": "##生成寶寶Video\n",
+        "height": 740,
+        "width": 940
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        660
+      ],
+      "id": "32773bde-4861-4762-904f-d345e56f042a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hedra.com/web-app/public/assets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "audio-file"
+            },
+            {
+              "name": "type",
+              "value": "audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        780
+      ],
+      "id": "324e0bb8-9b8d-474e-9a58-f63bb6b241ec",
+      "name": "Audio Container",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $('Google Sheets').item.json['Audio Path'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        160,
+        780
+      ],
+      "id": "f1827f01-1209-43e5-a497-af9a185e19c3",
+      "name": "Get Audio"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.hedra.com/web-app/public/assets/{{ $('Image Container').item.json.id }}/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        340
+      ],
+      "id": "0719bfab-6aa9-4d0d-a086-25d231f1afe8",
+      "name": "Upload Image",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.hedra.com/web-app/public/assets/{{ $('Audio Container').item.json.id }}/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        780
+      ],
+      "id": "0c652252-52f0-455f-a3a0-9ecdc0cb467c",
+      "name": "Upload Audio",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hedra.com/web-app/public/generations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"type\": \"video\",\n\"ai_model_id\": \"d1dd37a3-e39a-4854-a298-6510289f9cf2\",\n\"start_keyframe_id\": \"{{ $('Image Container').item.json.id }}\",\n\"audio_id\": \"{{ $('Audio Container').item.json.id }}\",\n\"generated_video_inputs\": {\n\"text_prompt\": \"A baby podcast host sitting in front of a microphone, speaking with\",\n\"resolution\": \"720p\",\n\"aspect_ratio\": \"9:16\"\n\n}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        1000
+      ],
+      "id": "95deac85-129f-4c56-93e0-c1042f594b4e",
+      "name": "Create Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        1000
+      ],
+      "id": "39962efe-299b-49af-8eaa-52b932a6fd93",
+      "name": "Wait",
+      "webhookId": "579eed60-7b37-46b9-817c-db17814b8bc7"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hedra.com/web-app/public/generations/{{$json.id}}/status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        1000
+      ],
+      "id": "481cce3d-839f-4415-80b0-0d3a6e449ea3",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "65d7f5f0-8ed4-422f-82ad-70fe15322e75",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        580,
+        1000
+      ],
+      "id": "4d739d18-8b2c-47af-89ef-ec597c3bdca1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "##添加字幕\n",
+        "height": 240,
+        "width": 1160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        920
+      ],
+      "id": "70fa519d-e5f7-45dc-a8bf-8ce303e2e721",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        1000
+      ],
+      "id": "c96bc65e-f2ce-4b57-b969-5cde27d8cb84",
+      "name": "Store Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xT2dDbbhWRaw93wQ",
+          "name": "hydra_api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Google Sheets').item.json['Video URL'].split(\"/\")[4].split(\"?\")[0] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        1000
+      ],
+      "id": "8b44f1cf-5330-48df-b85f-7ab9885e7fa6",
+      "name": "Store"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "timestamp_granularities[]",
+              "value": "word"
+            },
+            {
+              "name": "model",
+              "value": "whisper-1"
+            },
+            {
+              "name": "response_format",
+              "value": "verbose_json"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1400,
+        1000
+      ],
+      "id": "7f50969b-aec3-4ceb-bade-226fa38c3275",
+      "name": "Subtitle with timestamp"
+    },
+    {
+      "parameters": {
+        "jsCode": "const words = $input.first().json.words;\n\nconst fontfile = \"./HanyiSentyPagoda_Regular.ttf\";\nconst fontcolor = \"yellow\";\nconst fontsize = 120;\nconst positionY = \"h*0.88\";\nconst borderw = 4;\nconst bordercolor = \"black\";\nconst box = 1;\nconst boxcolor = \"black@0.6\";\n\n\nfunction removePunctuation(text) {\n  return text.replace(/[^\\w\\s\\u4e00-\\u9fa5]/g, \"\"); \n}\n\nconst drawtexts = words.map(word => {\n  const cleanedText = removePunctuation(word.word);\n  if (!cleanedText.trim()) return null; \n\n  const start = parseFloat(word.start.toFixed(2));\n  const end = parseFloat(word.end.toFixed(2));\n\n  return `drawtext=fontfile='${fontfile}':text='${cleanedText}':x=(w-text_w)/2:y=${positionY}:fontsize=${fontsize}:fontcolor=${fontcolor}:box=${box}:boxcolor=${boxcolor}:borderw=${borderw}:bordercolor=${bordercolor}:enable='between(t,${start},${end})'`;\n}).filter(Boolean); \n\nreturn [{ json: { filter_complex: drawtexts.join(\",\") } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        1000
+      ],
+      "id": "7caa8c42-7351-4322-9555-517b18bb5212",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "command": "=ffmpeg -y \\\n-i \"{{ $('Store').item.json.fileName }}\" \\\n-filter_complex \"\n[0:v]{{ $json.filter_complex }}[v0]\n\" \\\n-map \"[v0]\" \\\n-map 0:a \\\n-c:v libx264 -preset veryfast -c:a aac -b:a 192k -pix_fmt yuv420p \\\n\"./output/Final_{{ $('Store').item.json.fileName }}.mp4\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        1000
+      ],
+      "id": "d513e250-a0a3-4c94-976a-8cbd69295894",
+      "name": "Generate video with subtitle"
+    },
+    {
+      "parameters": {
+        "content": "##上傳到Youtube\n",
+        "height": 240,
+        "width": 1160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        900,
+        1340
+      ],
+      "id": "a3ff2d4b-d0c2-4994-be5b-c45c16c9d268",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/upload/youtube/v3/videos?part=snippet,status&uploadType=resumable",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Upload-Content-Type",
+              "value": "video/webm"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "RAW/JSON",
+        "body": "={\n  \"snippet\": {\n    \"title\": \"{{ $('Google Sheets').item.json['Video URL'].split('/')[4] }}\",\n    \"description\": \"N/A\",\n    \"defaultLanguage\": \"en\",\n    \"defaultAudioLanguage\": \"en\"\n  },\n  \"status\": {\n    \"privacyStatus\": \"public\",\n    \"license\": \"youtube\",\n    \"embeddable\": true,\n    \"publicStatsViewable\": true,\n    \"madeForKids\": false\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        1400
+      ],
+      "id": "72624065-319d-4a22-b5c6-dacccfc43e96",
+      "name": "YouTube Placeholder",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "JCFQZWQ73gdO5KzW",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "=./output/Final_{{ $('Store').item.json.fileName }}.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        1400
+      ],
+      "id": "f81fe8b7-bfce-4d0b-9d76-5c89d40320aa",
+      "name": "Read Final"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('YouTube Placeholder').item.json.headers.location }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "video/webm"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        1400
+      ],
+      "id": "90a775f8-fe06-4f55-901a-64e0c6e1da8d",
+      "name": "YouTube Upload",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "JCFQZWQ73gdO5KzW",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "./output/temp.jpg",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        660
+      ],
+      "id": "ede4418a-6f0b-4a69-8474-41064836eba4",
+      "name": "Read/Write Files from Disk1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/upload/youtube/v3/videos?part=snippet,status&uploadType=resumable",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Upload-Content-Type",
+              "value": "video/webm"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "RAW/JSON",
+        "body": "={\n  \"snippet\": {\n    \"title\": \"test\",\n    \"description\": \"N/A\",\n    \"defaultLanguage\": \"en\",\n    \"defaultAudioLanguage\": \"en\"\n  },\n  \"status\": {\n    \"privacyStatus\": \"public\",\n    \"license\": \"youtube\",\n    \"embeddable\": true,\n    \"publicStatsViewable\": true,\n    \"madeForKids\": false\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        1820
+      ],
+      "id": "f43539e1-7af1-42f6-a3a5-f3eb973608aa",
+      "name": "YouTube Placeholder1",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "JCFQZWQ73gdO5KzW",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "=./output/Final_Rolrtr0-BwM.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        1840
+      ],
+      "id": "8635c2f2-5a86-44a4-ac4f-6dfe040df67e",
+      "name": "Read Final1"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('YouTube Placeholder1').item.json.headers.location }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "youTubeOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "video/webm"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        1820
+      ],
+      "id": "6ba811e7-5f60-4a1b-9046-2293ed85d2ac",
+      "name": "YouTube Upload1",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "JCFQZWQ73gdO5KzW",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I",
+          "mode": "list",
+          "cachedResultName": "Baby Podcasts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Downloaded",
+            "Video URL": "={{ $('Google Sheets').item.json['Video URL'] }}",
+            "Video Path": "=",
+            "Audio Path": "=",
+            "Image Path": "=",
+            "Production": "Done"
+          },
+          "matchingColumns": [
+            "Video URL"
+          ],
+          "schema": [
+            {
+              "id": "Index",
+              "displayName": "Index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Path",
+              "displayName": "Video Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Audio Path",
+              "displayName": "Audio Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image Path",
+              "displayName": "Image Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Production",
+              "displayName": "Production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1920,
+        1800
+      ],
+      "id": "0595e6da-bd82-4ae2-b7b4-6063c8e5aa43",
+      "name": "Update Log1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XsodyqhrV9HPNRtk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I",
+          "mode": "list",
+          "cachedResultName": "Baby Podcasts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zABnGtwGGY5XoVPcfHgmN7jX9QGAudvT14IalYbIg-I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Downloaded",
+            "Video URL": "={{ $('Google Sheets').item.json['Video URL'] }}",
+            "Video Path": "=",
+            "Audio Path": "=",
+            "Image Path": "=",
+            "Production": "Done"
+          },
+          "matchingColumns": [
+            "Video URL"
+          ],
+          "schema": [
+            {
+              "id": "Index",
+              "displayName": "Index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video URL",
+              "displayName": "Video URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Path",
+              "displayName": "Video Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Audio Path",
+              "displayName": "Audio Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Image Path",
+              "displayName": "Image Path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Production",
+              "displayName": "Production",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1620,
+        1400
+      ],
+      "id": "1eb67a77-cc9d-40ee-ab7d-d4f238054030",
+      "name": "Update Log",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XsodyqhrV9HPNRtk",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-06-09T22:48:00.109+08:00",
+          "Readable date": "June 9th 2025, 10:48:00 pm",
+          "Readable time": "10:48:00 pm",
+          "Day of week": "Monday",
+          "Year": "2025",
+          "Month": "June",
+          "Day of month": "09",
+          "Hour": "22",
+          "Minute": "48",
+          "Second": "00",
+          "Timezone": "Asia/Taipei (UTC+08:00)"
+        }
+      }
+    ],
+    "Schedule Trigger1": [
+      {
+        "json": {
+          "timestamp": "2025-06-09T22:48:00.109+08:00",
+          "Readable date": "June 9th 2025, 10:48:00 pm",
+          "Readable time": "10:48:00 pm",
+          "Day of week": "Monday",
+          "Year": "2025",
+          "Month": "June",
+          "Day of month": "09",
+          "Hour": "22",
+          "Minute": "48",
+          "Second": "00",
+          "Timezone": "Asia/Taipei (UTC+08:00)"
+        }
+      }
+    ],
+    "Create Video": [
+      {
+        "json": {
+          "type": "video",
+          "ai_model_id": "d1dd37a3-e39a-4854-a298-6510289f9cf2",
+          "start_keyframe_id": "03adf5ac-fd3b-4589-881c-402532c435d7",
+          "audio_id": "5f4acc42-dd34-415f-934f-dff57da90805",
+          "generated_video_inputs": {
+            "text_prompt": "A baby podcast host sitting in front of a microphone, speaking with",
+            "resolution": "720p",
+            "aspect_ratio": "9:16",
+            "duration_ms": 0,
+            "bounding_box_target": null
+          },
+          "id": "c10b5560-2ed4-4baf-b377-518f8dbd1043",
+          "asset_id": "b7a612f0-40a1-4908-b61d-a2e62027d584"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get URL": {
+      "main": [
+        [
+          {
+            "node": "Download Shorts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Shorts": {
+      "main": [
+        [
+          {
+            "node": "Extract Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Audio": {
+      "main": [
+        [
+          {
+            "node": "Extract Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Image": {
+      "main": [
+        [
+          {
+            "node": "Update Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Image Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Container": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Read Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Image": {
+      "main": [
+        [
+          {
+            "node": "Baby Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baby Image": {
+      "main": [
+        [
+          {
+            "node": "Get Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image": {
+      "main": [
+        [
+          {
+            "node": "Upload Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Container": {
+      "main": [
+        [
+          {
+            "node": "Get Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image": {
+      "main": [
+        [
+          {
+            "node": "Audio Container",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio": {
+      "main": [
+        [
+          {
+            "node": "Upload Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Audio": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Store Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Video": {
+      "main": [
+        [
+          {
+            "node": "Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subtitle with timestamp": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Generate video with subtitle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate video with subtitle": {
+      "main": [
+        [
+          {
+            "node": "YouTube Placeholder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Final": {
+      "main": [
+        [
+          {
+            "node": "YouTube Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Upload": {
+      "main": [
+        [
+          {
+            "node": "Update Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        []
+      ]
+    },
+    "Store": {
+      "main": [
+        [
+          {
+            "node": "Subtitle with timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Placeholder": {
+      "main": [
+        [
+          {
+            "node": "Read Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Placeholder1": {
+      "main": [
+        [
+          {
+            "node": "Read Final1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Final1": {
+      "main": [
+        [
+          {
+            "node": "YouTube Upload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Upload1": {
+      "main": [
+        [
+          {
+            "node": "Update Log1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "341d8c78-a92d-4366-9a9d-413645c50acb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97a341a4f07b935450a00fd32a8a680a0f365649b2a8b3c9c8b046ef988da0ff"
+  },
+  "id": "anhdTBK3uyAYN1hd",
+  "tags": []
+}
